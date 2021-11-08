@@ -35,8 +35,8 @@ public class NavMesh {
     static int DT_POLY_BITS = 20;
     public static final int DT_DETAIL_EDGE_BOUNDARY = 0x01;
 
-    /// A flag that indicates that an entity links to an external entity.
-    /// (E.g. A polygon edge is a portal that links to another polygon.)
+    /// 指示实体链接到外部实体的标志。
+    /// （例如，多边形边是链接到另一个多边形的入口。）
     public static final int DT_EXT_LINK = 0x8000;
 
     /// A value that indicates the entity does not link to anything.
