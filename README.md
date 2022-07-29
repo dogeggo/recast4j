@@ -1,7 +1,8 @@
 ![Build Status](https://img.shields.io/github/workflow/status/ppiastucki/recast4j/Java%20CI/master?logo=github)
 ![Repo Size](https://img.shields.io/github/repo-size/ppiastucki/recast4j.svg?colorB=lightgray)
 [![Maven Central](https://img.shields.io/maven-central/v/org.recast4j/recast.svg?label=maven%20central)](https://search.maven.org/search?q=g:org.recast4j)
-[![Travis Build](https://travis-ci.org/ppiastucki/recast4j.svg?branch=master)](https://travis-ci.org/ppiastucki/recast4j)
+![Languages](https://img.shields.io/github/languages/top/ppiastucki/recast4j)
+![Dependencies](https://img.shields.io/librariesio/github/ppiastucki/recast4j)
 
 Recast4j
 ========
@@ -73,38 +74,47 @@ java -jar ./recast-demo/build/libs/recast-demo-1.5.1-SNAPSHOT-all.jar
 
 #### Releases
 Recast4j releases are available in Maven Central Repository.
-The project includes 4 artifacts:
+Maven:
 ```
 <dependency>
 	<groupId>org.recast4j</groupId>
 	<artifactId>recast</artifactId>
-	<version>1.5.0</version>
+	<version>1.5.3</version>
 </dependency>
 <dependency>
 	<groupId>org.recast4j</groupId>
 	<artifactId>detour</artifactId>
-	<version>1.5.0</version>
+	<version>1.5.3</version>
 </dependency>
 <dependency>
 	<groupId>org.recast4j</groupId>
 	<artifactId>detour-crowd</artifactId>
-	<version>1.5.0</version>
+	<version>1.5.3</version>
 </dependency>
 <dependency>
 	<groupId>org.recast4j</groupId>
 	<artifactId>detour-tile-cache</artifactId>
-	<version>1.5.0</version>
+	<version>1.5.3</version>
 </dependency>
 <dependency>
 	<groupId>org.recast4j</groupId>
 	<artifactId>detour-extras</artifactId>
-	<version>1.5.0</version>
+	<version>1.5.3</version>
 </dependency>
 <dependency>
 	<groupId>org.recast4j</groupId>
 	<artifactId>detour-dynamic</artifactId>
-	<version>1.5.0</version>
+	<version>1.5.3</version>
 </dependency>
+```
+Gradle:
+```
+implementation 'org.recast4j:recast:1.5.3'
+implementation 'org.recast4j:detour:1.5.3'
+implementation 'org.recast4j:detour-crowd:1.5.3'
+implementation 'org.recast4j:detour-tile-cache:1.5.3'
+implementation 'org.recast4j:detour-extras:1.5.3'
+implementation 'org.recast4j:detour-dynamic:1.5.3'
 ```
 
 #### Snapshots
