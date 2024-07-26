@@ -107,7 +107,7 @@ public class NavMeshQuery {
                 continue;
             }
 
-            // Choose random tile using reservoi sampling.
+            // Choose random tile using reservoir sampling.
             float area = 1.0f; // Could be tile area too.
             tsum += area;
             float u = frand.frand();
@@ -146,7 +146,7 @@ public class NavMeshQuery {
                 polyArea += triArea2D(tile.data.verts, va, vb, vc);
             }
 
-            // Choose random polygon weighted by area, using reservoi sampling.
+            // Choose random polygon weighted by area, using reservoir sampling.
             areaSum += polyArea;
             float u = frand.frand();
             if (u * areaSum <= polyArea) {
@@ -171,13 +171,8 @@ public class NavMeshQuery {
         float t = frand.frand();
 
         float[] pt = randomPointInConvexPoly(verts, poly.vertCount, areas, s, t);
-        FindRandomPointResult result = new FindRandomPointResult(polyRef, pt);
-        Result<Float> pheight = getPolyHeight(polyRef, pt);
-        if (pheight.failed()) {
-            return Result.of(pheight.status, result);
-        }
-        pt[1] = pheight.result;
-        return Result.success(result);
+        ClosestPointOnPolyResult closest = closestPointOnPoly(polyRef, pt).result;
+        return Result.success(new FindRandomPointResult(polyRef, closest.getClosest()));
     }
 
     /**
@@ -261,7 +256,7 @@ public class NavMeshQuery {
             bestNode.flags &= ~DT_NODE_OPEN;
             bestNode.flags |= DT_NODE_CLOSED;
             // Get poly and tile.
-            // The API input has been cheked already, skip checking internal data.
+            // The API input has been checked already, skip checking internal data.
             long bestRef = bestNode.id;
             Tupple2<MeshTile, Poly> bestTilePoly = m_nav.getTileAndPolyByRefUnsafe(bestRef);
             MeshTile bestTile = bestTilePoly.first;
@@ -275,7 +270,7 @@ public class NavMeshQuery {
                 for (int j = 0; j < bestPoly.vertCount; ++j) {
                     System.arraycopy(bestTile.data.verts, bestPoly.verts[j] * 3, polyVerts, j * 3, 3);
                 }
-                float[] constrainedVerts = constraint.aply(polyVerts, centerPos, maxRadius);
+                float[] constrainedVerts = constraint.apply(polyVerts, centerPos, maxRadius);
                 if (constrainedVerts != null) {
                     int vertCount = constrainedVerts.length / 3;
                     for (int j = 2; j < vertCount; ++j) {
@@ -284,7 +279,7 @@ public class NavMeshQuery {
                         int vc = j * 3;
                         polyArea += triArea2D(constrainedVerts, va, vb, vc);
                     }
-                    // Choose random polygon weighted by area, using reservoi sampling.
+                    // Choose random polygon weighted by area, using reservoir sampling.
                     areaSum += polyArea;
                     float u = frand.frand();
                     if (u * areaSum <= polyArea) {
@@ -377,13 +372,8 @@ public class NavMeshQuery {
 
         float[] areas = new float[randomPolyVerts.length / 3];
         float[] pt = randomPointInConvexPoly(randomPolyVerts, randomPolyVerts.length / 3, areas, s, t);
-        FindRandomPointResult result = new FindRandomPointResult(randomPolyRef, pt);
-        Result<Float> pheight = getPolyHeight(randomPolyRef, pt);
-        if (pheight.failed()) {
-            return Result.of(pheight.status, result);
-        }
-        pt[1] = pheight.result;
-        return Result.success(result);
+        ClosestPointOnPolyResult closest = closestPointOnPoly(randomPolyRef, pt).result;
+        return Result.success(new FindRandomPointResult(randomPolyRef, closest.getClosest()));
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -665,7 +655,7 @@ public class NavMeshQuery {
      * The start and end positions are used to calculate traversal costs. (The y-values impact the result.)
      *
      * @param startRef
-     *            The refrence id of the start polygon.
+     *            The reference id of the start polygon.
      * @param endRef
      *            The reference id of the end polygon.
      * @param startPos
@@ -741,7 +731,7 @@ public class NavMeshQuery {
             }
 
             // Get current poly and tile.
-            // The API input has been cheked already, skip checking internal data.
+            // The API input has been checked already, skip checking internal data.
             long bestRef = bestNode.id;
             Tupple2<MeshTile, Poly> tileAndPoly = m_nav.getTileAndPolyByRefUnsafe(bestRef);
             MeshTile bestTile = tileAndPoly.first;
@@ -783,7 +773,7 @@ public class NavMeshQuery {
                 }
 
                 // Get neighbour poly and tile.
-                // The API input has been cheked already, skip checking internal data.
+                // The API input has been checked already, skip checking internal data.
                 tileAndPoly = m_nav.getTileAndPolyByRefUnsafe(neighbourRef);
                 MeshTile neighbourTile = tileAndPoly.first;
                 Poly neighbourPoly = tileAndPoly.second;
@@ -822,7 +812,8 @@ public class NavMeshQuery {
                     Result<RaycastHit> rayHit = raycast(parentRef, parentNode.pos, neighbourPos, filter,
                             DT_RAYCAST_USE_COSTS, grandpaRef);
                     if (rayHit.succeeded()) {
-                        foundShortCut = rayHit.result.t >= 1.0f;
+                        foundShortCut = rayHit.result.t >= 1.0f
+                                && rayHit.result.path.get(rayHit.result.path.size() - 1) == neighbourRef;
                         if (foundShortCut) {
                             shortcut = rayHit.result.path;
                             // shortcut found using raycast. Using shorter cost
@@ -1014,7 +1005,7 @@ public class NavMeshQuery {
             }
 
             // Get current poly and tile.
-            // The API input has been cheked already, skip checking internal
+            // The API input has been checked already, skip checking internal
             // data.
             long bestRef = bestNode.id;
             Result<Tupple2<MeshTile, Poly>> tileAndPoly = m_nav.getTileAndPolyByRef(bestRef);
@@ -1070,7 +1061,7 @@ public class NavMeshQuery {
                 }
 
                 // Get neighbour poly and tile.
-                // The API input has been cheked already, skip checking internal
+                // The API input has been checked already, skip checking internal
                 // data.
                 Tupple2<MeshTile, Poly> tileAndPolyUns = m_nav.getTileAndPolyByRefUnsafe(neighbourRef);
                 MeshTile neighbourTile = tileAndPolyUns.first;
@@ -1111,7 +1102,8 @@ public class NavMeshQuery {
                     Result<RaycastHit> rayHit = raycast(parentRef, parentNode.pos, neighbourPos, m_query.filter,
                             DT_RAYCAST_USE_COSTS, grandpaRef);
                     if (rayHit.succeeded()) {
-                        foundShortCut = rayHit.result.t >= 1.0f;
+                        foundShortCut = rayHit.result.t >= 1.0f
+                                && rayHit.result.path.get(rayHit.result.path.size() - 1) == neighbourRef;
                         if (foundShortCut) {
                             shortcut = rayHit.result.path;
                             // shortcut found using raycast. Using shorter cost
@@ -1609,7 +1601,7 @@ public class NavMeshQuery {
             Node curNode = stack.pop();
 
             // Get poly and tile.
-            // The API input has been cheked already, skip checking internal data.
+            // The API input has been checked already, skip checking internal data.
             long curRef = curNode.id;
             Tupple2<MeshTile, Poly> tileAndPoly = m_nav.getTileAndPolyByRefUnsafe(curRef);
             MeshTile curTile = tileAndPoly.first;
@@ -2192,7 +2184,7 @@ public class NavMeshQuery {
             bestNode.flags |= Node.DT_NODE_CLOSED;
 
             // Get poly and tile.
-            // The API input has been cheked already, skip checking internal data.
+            // The API input has been checked already, skip checking internal data.
             long bestRef = bestNode.id;
             Tupple2<MeshTile, Poly> tileAndPoly = m_nav.getTileAndPolyByRefUnsafe(bestRef);
             MeshTile bestTile = tileAndPoly.first;
@@ -2360,7 +2352,7 @@ public class NavMeshQuery {
             bestNode.flags |= Node.DT_NODE_CLOSED;
 
             // Get poly and tile.
-            // The API input has been cheked already, skip checking internal data.
+            // The API input has been checked already, skip checking internal data.
             long bestRef = bestNode.id;
             Tupple2<MeshTile, Poly> tileAndPoly = m_nav.getTileAndPolyByRefUnsafe(bestRef);
             MeshTile bestTile = tileAndPoly.first;
@@ -2524,7 +2516,7 @@ public class NavMeshQuery {
             Node curNode = stack.pop();
 
             // Get poly and tile.
-            // The API input has been cheked already, skip checking internal data.
+            // The API input has been checked already, skip checking internal data.
             long curRef = curNode.id;
             Tupple2<MeshTile, Poly> tileAndPoly = m_nav.getTileAndPolyByRefUnsafe(curRef);
             MeshTile curTile = tileAndPoly.first;
@@ -2824,7 +2816,7 @@ public class NavMeshQuery {
             bestNode.flags |= Node.DT_NODE_CLOSED;
 
             // Get poly and tile.
-            // The API input has been cheked already, skip checking internal data.
+            // The API input has been checked already, skip checking internal data.
             long bestRef = bestNode.id;
             Tupple2<MeshTile, Poly> tileAndPoly = m_nav.getTileAndPolyByRefUnsafe(bestRef);
             MeshTile bestTile = tileAndPoly.first;
@@ -3026,20 +3018,20 @@ public class NavMeshQuery {
         // Reverse the path.
         Node curNode = endNode;
         do {
-            path.add(0, curNode.id);
+            path.add(curNode.id);
             Node nextNode = m_nodePool.getNodeAtIdx(curNode.pidx);
             if (curNode.shortcut != null) {
                 // remove potential duplicates from shortcut path
                 for (int i = curNode.shortcut.size() - 1; i >=0; i--) {
                     long id = curNode.shortcut.get(i);
                     if (id != curNode.id && id != nextNode.id) {
-                        path.add(0, id);
+                        path.add(id);
                     }
                 }
             }
             curNode = nextNode;
         } while (curNode != null);
-
+        Collections.reverse(path);
         return path;
     }
 

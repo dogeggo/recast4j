@@ -181,7 +181,7 @@ public class RecastMesh {
     }
 
     // Returns T iff (a,b,c) are collinear and point c lies
-    // on the closed segement ab.
+    // on the closed segment ab.
     private static boolean between(int[] verts, int a, int b, int c) {
         if (!collinear(verts, a, b, c))
             return false;
@@ -189,20 +189,17 @@ public class RecastMesh {
         if (verts[a + 0] != verts[b + 0])
             return ((verts[a + 0] <= verts[c + 0]) && (verts[c + 0] <= verts[b + 0]))
                     || ((verts[a + 0] >= verts[c + 0]) && (verts[c + 0] >= verts[b + 0]));
-        else
-            return ((verts[a + 2] <= verts[c + 2]) && (verts[c + 2] <= verts[b + 2]))
-                    || ((verts[a + 2] >= verts[c + 2]) && (verts[c + 2] >= verts[b + 2]));
+        return ((verts[a + 2] <= verts[c + 2]) && (verts[c + 2] <= verts[b + 2]))
+                || ((verts[a + 2] >= verts[c + 2]) && (verts[c + 2] >= verts[b + 2]));
     }
 
     // Returns true iff segments ab and cd intersect, properly or improperly.
     static boolean intersect(int[] verts, int a, int b, int c, int d) {
         if (intersectProp(verts, a, b, c, d))
             return true;
-        else if (between(verts, a, b, c) || between(verts, a, b, d) || between(verts, c, d, a)
-                || between(verts, c, d, b))
+        if (between(verts, a, b, c) || between(verts, a, b, d) || between(verts, c, d, a) || between(verts, c, d, b))
             return true;
-        else
-            return false;
+        return false;
     }
 
     static boolean vequal(int[] verts, int a, int b) {
@@ -679,9 +676,9 @@ public class RecastMesh {
 
         // Start with one vertex, keep appending connected
         // segments to the start and end of the hole.
-        pushBack(edges[0], hole, nhole);
-        pushBack(edges[2], hreg, nhreg);
-        pushBack(edges[3], harea, nharea);
+        nhole = pushBack(edges[0], hole, nhole);
+        nhreg = pushBack(edges[2], hreg, nhreg);
+        nharea = pushBack(edges[3], harea, nharea);
 
         while (nedges != 0) {
             boolean match = false;
@@ -694,9 +691,9 @@ public class RecastMesh {
                 boolean add = false;
                 if (hole[0] == eb) {
                     // The segment matches the beginning of the hole boundary.
-                    pushFront(ea, hole, nhole);
-                    pushFront(r, hreg, nhreg);
-                    pushFront(a, harea, nharea);
+                    nhole = pushFront(ea, hole, nhole);
+                    nhreg = pushFront(r, hreg, nhreg);
+                    nharea = pushFront(a, harea, nharea);
                     add = true;
                 } else if (hole[nhole - 1] == ea) {
                     // The segment matches the end of the hole boundary.
@@ -842,7 +839,7 @@ public class RecastMesh {
     /// @par
     ///
     /// @note If the mesh data is to be used to construct a Detour navigation mesh, then the upper
-    /// limit must be retricted to <= #DT_VERTS_PER_POLYGON.
+    /// limit must be restricted to <= #DT_VERTS_PER_POLYGON.
     ///
     /// @see rcAllocPolyMesh, rcContourSet, rcPolyMesh, rcConfig
     public static PolyMesh buildPolyMesh(Telemetry ctx, ContourSet cset, int nvp) {
